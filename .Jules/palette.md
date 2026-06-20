@@ -1,0 +1,3 @@
+## 2024-06-20 - Missing Labels and Loading States in Custom Authentication Forms
+**Learning:** Custom authentication forms (like those in Next.js applications that aren't using pre-built libraries) frequently lack screen reader accessibility (due to relying solely on placeholders without `<label>` tags) and fail to provide immediate user feedback during async submission (missing loading/disabled states). This creates a poor experience for screen reader users and can lead to frustration or duplicate submissions.
+**Action:** Always verify that input fields have associated labels (using `sr-only` if visual design dictates only placeholders) and ensure forms have an `isLoading` state that disables the submit button and provides visual feedback during submission.
