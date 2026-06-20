@@ -9,11 +9,13 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
       await api.post('/auth/register', {
@@ -26,6 +28,8 @@ export default function SignupPage() {
     } catch (err: unknown) {
       const errorResponse = err as { response?: { data?: { detail?: string } } };
       setError(errorResponse.response?.data?.detail || 'Signup failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,8 +45,14 @@ export default function SignupPage() {
           {error && <div className="text-red-500 text-sm text-center">{error}</div>}
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
               <input
+                id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 required
                 className="relative block w-full rounded-t-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="Email address"
@@ -51,8 +61,14 @@ export default function SignupPage() {
               />
             </div>
             <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <input
+                id="password"
+                name="password"
                 type="password"
+                autoComplete="new-password"
                 required
                 className="relative block w-full rounded-b-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="Password"
@@ -65,9 +81,12 @@ export default function SignupPage() {
           <div>
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              disabled={isLoading}
+              className={`group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                isLoading ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
             >
-              Sign up
+              {isLoading ? 'Signing up...' : 'Sign up'}
             </button>
           </div>
           <div className="text-center text-sm">
