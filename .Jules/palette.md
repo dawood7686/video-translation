@@ -1,0 +1,3 @@
+## 2026-06-21 - Auth Form Accessibility & Async Feedback
+**Learning:** In Tailwind UI styled forms, inputs stacked together often omit visible labels. Relying solely on placeholders is an accessibility anti-pattern. Adding `sr-only` labels tied to inputs via `id` ensures screen readers can identify fields without breaking the design. Additionally, immediate visual feedback (e.g., loading spinner and disabled button) during async auth requests is crucial to prevent double submissions and confusion.
+**Action:** Always verify that every input element has an associated label, visually hidden if necessary. Always implement loading and disabled states on submit buttons executing async operations.
