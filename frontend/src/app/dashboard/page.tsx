@@ -27,25 +27,42 @@ export default function DashboardPage() {
       return;
     }
 
+    let timeoutId: NodeJS.Timeout;
+    let isMounted = true;
+
     const fetchVideos = async () => {
       try {
         const res = await api.get('/videos/');
+        if (!isMounted) return;
         setVideos(res.data);
+
+        // ⚡ Bolt Performance Optimization:
+        // Only poll if there are videos actively being processed.
+        // Prevents unnecessary network requests and backend load for users with only completed/failed videos.
+        // Using setTimeout instead of setInterval ensures requests don't overlap if backend is slow.
+        const needsPolling = res.data.some(
+          (video: Video) => video.status === 'pending' || video.status === 'processing'
+        );
+
+        if (needsPolling) {
+          timeoutId = setTimeout(fetchVideos, 10000); // 10 seconds
+        }
       } catch (err) {
+        if (!isMounted) return;
         console.error('Failed to fetch videos', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchVideos();
 
-    // Poll for updates if any video is processing
-    const interval = setInterval(() => {
-      fetchVideos();
-    }, 10000); // 10 seconds
-
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [router]);
 
   return (
