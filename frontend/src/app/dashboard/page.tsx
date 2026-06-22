@@ -27,25 +27,41 @@ export default function DashboardPage() {
       return;
     }
 
+    let timeoutId: NodeJS.Timeout;
+    let isActivePollRequired = true; // Start assuming we need to fetch at least once to determine status
+    let isMounted = true;
+
     const fetchVideos = async () => {
       try {
         const res = await api.get('/videos/');
+        if (!isMounted) return;
         setVideos(res.data);
+
+        // Performance optimization: Only poll if there are videos actively processing
+        // This reduces unnecessary network requests and backend load
+        isActivePollRequired = res.data.some(
+          (video: Video) => video.status === 'pending' || video.status === 'processing'
+        );
       } catch (err) {
+        if (!isMounted) return;
         console.error('Failed to fetch videos', err);
+        // On error, we keep the previous state of isActivePollRequired
+        // so that transient errors don't permanently halt polling
       } finally {
+        if (!isMounted) return;
         setLoading(false);
+        if (isActivePollRequired) {
+          timeoutId = setTimeout(fetchVideos, 10000);
+        }
       }
     };
 
     fetchVideos();
 
-    // Poll for updates if any video is processing
-    const interval = setInterval(() => {
-      fetchVideos();
-    }, 10000); // 10 seconds
-
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [router]);
 
   return (
