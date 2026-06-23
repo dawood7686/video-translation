@@ -22,6 +22,8 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     if (!isAuthenticated()) {
       router.push('/login');
       return;
@@ -29,24 +31,55 @@ export default function DashboardPage() {
 
     const fetchVideos = async () => {
       try {
+        // ⚡ Bolt Performance Optimization:
+        // Initial fetch sets up data.
         const res = await api.get('/videos/');
-        setVideos(res.data);
+        if (isMounted) {
+          setVideos(res.data);
+        }
       } catch (err) {
         console.error('Failed to fetch videos', err);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchVideos();
 
-    // Poll for updates if any video is processing
-    const interval = setInterval(() => {
-      fetchVideos();
-    }, 10000); // 10 seconds
-
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let interval: NodeJS.Timeout;
+
+    // ⚡ Bolt Performance Optimization:
+    // Only poll the API if there are videos currently pending or processing.
+    // This significantly reduces unnecessary API calls for users idling on the dashboard.
+    const needsPolling = videos.some(v => v.status === 'pending' || v.status === 'processing');
+
+    if (needsPolling) {
+      interval = setInterval(async () => {
+        try {
+          const res = await api.get('/videos/');
+          if (isMounted) {
+            setVideos(res.data);
+          }
+        } catch (err) {
+          console.error('Failed to poll videos', err);
+        }
+      }, 10000); // 10 seconds
+    }
+
+    return () => {
+      isMounted = false;
+      if (interval) clearInterval(interval);
+    };
+  }, [videos]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
