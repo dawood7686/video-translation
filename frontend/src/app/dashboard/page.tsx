@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -21,32 +21,38 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const fetchVideos = useCallback(async () => {
+    try {
+      const res = await api.get('/videos/');
+      setVideos(res.data);
+    } catch (err) {
+      console.error('Failed to fetch videos', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/login');
       return;
     }
 
-    const fetchVideos = async () => {
-      try {
-        const res = await api.get('/videos/');
-        setVideos(res.data);
-      } catch (err) {
-        console.error('Failed to fetch videos', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchVideos();
+  }, [router, fetchVideos]);
 
-    // Poll for updates if any video is processing
+  useEffect(() => {
+    // ⚡ Bolt Optimization: Only poll when there are videos in a non-terminal state.
+    // This eliminates unnecessary network requests and server load when all tasks are complete.
+    const hasActiveVideos = videos.some(v => v.status === 'processing' || v.status === 'pending');
+    if (!hasActiveVideos) return;
+
     const interval = setInterval(() => {
       fetchVideos();
-    }, 10000); // 10 seconds
+    }, 10000);
 
     return () => clearInterval(interval);
-  }, [router]);
+  }, [videos, fetchVideos]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
