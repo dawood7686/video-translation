@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
+import os
 
 from .. import models, schemas, database
 from .auth import get_current_user
@@ -36,15 +37,23 @@ def upload_video(
     if target_language not in SUPPORTED_LANGUAGES:
         raise HTTPException(status_code=400, detail="Unsupported target language")
 
+    # Sanitize the filename to prevent path traversal
+    safe_filename = os.path.basename(file.filename)
+
     # Generate a unique key for MinIO
-    file_extension = file.filename.split(".")[-1]
+    file_extension = safe_filename.split(".")[-1]
+    # Ensure extension only contains alphanumeric characters
+    file_extension = "".join([c for c in file_extension if c.isalnum()])
+    if not file_extension:
+        file_extension = "mp4"
+
     unique_id = str(uuid.uuid4())
     original_video_key = f"{current_user.id}/{unique_id}/original.{file_extension}"
 
     # Save metadata to DB
     video = models.Video(
-        title=file.filename,
-        original_filename=file.filename,
+        title=safe_filename,
+        original_filename=safe_filename,
         target_language=target_language,
         original_video_key=original_video_key,
         owner_id=current_user.id,
