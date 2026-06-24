@@ -104,7 +104,7 @@ def process_video_translation(self, video_id: int):
 
     except Exception as e:
         video.status = "failed"
-        video.error_message = str(e)
+        video.error_message = "An error occurred during video processing."
         db.commit()
         print(f"Error processing video {video_id}: {e}")
     finally:
