@@ -2,3 +2,6 @@
 ## 2026-06-23 - Accessibility labels & loading states
 **Learning:** Added 'sr-only' labels and associated inputs correctly via ID properties, as well as applying disabled/loading UI states to provide crucial interaction feedback. Playwright tests showed that testing intercepted API fetches required custom Javascript mock logic for window.fetch to ensure frontend correctly processes delayed promises to display UI loading states visually.
 **Action:** Apply this consistent UI loading state across all forms fetching async data and utilize 'sr-only' classes for forms missing visually rendered labels.
+## 2024-06-24 - File Upload Drag and Drop & Error Accessibility
+**Learning:** Adding `role="alert"` to error message containers ensures screen readers immediately announce form validation failures, improving accessibility without visual changes. Drag-and-drop file inputs are great for mouse users, but when providing a visual dropzone, it's essential to give clear visual feedback (like highlighting via `onDragOver`) during the drag operation to improve usability and confidence.
+**Action:** Always include `role="alert"` for dynamically rendered error messages in forms. Always add drag state tracking and visual styling for custom file dropzones.
