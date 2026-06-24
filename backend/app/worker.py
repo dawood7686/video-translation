@@ -52,7 +52,15 @@ def process_video_translation(self, video_id: int):
 
             # 4. Translate Text and Generate TTS for each segment
             translated_audio_path = os.path.join(temp_dir, "translated_audio.wav")
-            combined_audio = AudioSegment.silent(duration=0) # start with empty audio
+
+            # ⚡ Bolt Optimization: Collect audio segments in a list and join their raw bytes.
+            # Repeated `combined_audio += seg_audio` creates a new copy of the full audio data
+            # on every loop iteration, leading to O(N^2) complexity. Joining raw bytes at the end
+            # is O(N) and significantly speeds up worker processing for longer videos.
+            audio_segments_list = []
+            current_dur_ms = 0
+            # Keep track of properties to ensure padding matches TTS output exactly
+            audio_properties = None
 
             for segment in segments:
                 text = segment["text"]
@@ -68,15 +76,35 @@ def process_video_translation(self, video_id: int):
                 if os.path.exists(segment_audio_path):
                     seg_audio = AudioSegment.from_file(segment_audio_path)
 
+                    if not audio_properties:
+                        audio_properties = {
+                            "frame_rate": seg_audio.frame_rate,
+                            "channels": seg_audio.channels,
+                            "sample_width": seg_audio.sample_width
+                        }
+
                     # Calculate padding needed to align with original video timing
                     start_ms = int(segment["start"] * 1000)
-                    current_dur_ms = len(combined_audio)
 
                     if start_ms > current_dur_ms:
-                        padding = AudioSegment.silent(duration=(start_ms - current_dur_ms))
-                        combined_audio += padding
+                        duration_ms = start_ms - current_dur_ms
+                        padding = AudioSegment.silent(
+                            duration=duration_ms,
+                            frame_rate=audio_properties["frame_rate"]
+                        ).set_channels(audio_properties["channels"]).set_sample_width(audio_properties["sample_width"])
+                        audio_segments_list.append(padding)
+                        current_dur_ms = start_ms
 
-                    combined_audio += seg_audio
+                    audio_segments_list.append(seg_audio)
+                    current_dur_ms += len(seg_audio)
+
+            if audio_segments_list:
+                # O(N) concatenation by joining the raw bytes, since all segments now have matching properties.
+                combined_audio_data = b"".join([seg._data for seg in audio_segments_list])
+                first_seg = next((s for s in audio_segments_list if len(s) > 0), AudioSegment.silent(duration=0))
+                combined_audio = first_seg._spawn(combined_audio_data)
+            else:
+                combined_audio = AudioSegment.silent(duration=0)
 
             # Export combined translated audio
             combined_audio.export(translated_audio_path, format="wav")
