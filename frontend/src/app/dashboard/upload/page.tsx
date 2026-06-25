@@ -71,7 +71,7 @@ export default function UploadPage() {
         </p>
 
         <form onSubmit={handleUpload} className="mt-8 space-y-6">
-          {error && <div className="text-red-500 text-sm">{error}</div>}
+          {error && <div className="text-red-500 text-sm" role="alert">{error}</div>}
 
           <div>
             <label htmlFor="language" className="block text-sm font-medium leading-6 text-gray-900">
