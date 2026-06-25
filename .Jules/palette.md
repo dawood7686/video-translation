@@ -2,3 +2,6 @@
 ## 2026-06-23 - Accessibility labels & loading states
 **Learning:** Added 'sr-only' labels and associated inputs correctly via ID properties, as well as applying disabled/loading UI states to provide crucial interaction feedback. Playwright tests showed that testing intercepted API fetches required custom Javascript mock logic for window.fetch to ensure frontend correctly processes delayed promises to display UI loading states visually.
 **Action:** Apply this consistent UI loading state across all forms fetching async data and utilize 'sr-only' classes for forms missing visually rendered labels.
+## 2026-06-25 - Playwright Request Interception
+**Learning:** When using Playwright for UI verification, `page.route` may fail to intercept Next.js or Axios API requests depending on the underlying fetch mechanism.
+**Action:** Mock `window.fetch` or `window.XMLHttpRequest` directly in the browser context using `page.evaluate()` to reliably simulate API responses and delays when `page.route` fails.
