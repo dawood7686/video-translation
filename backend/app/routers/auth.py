@@ -60,6 +60,9 @@ def login_access_token(db: Session = Depends(database.get_db), form_data: OAuth2
     """
     OAuth2 compatible token login, get an access token for future requests.
     """
+    if len(form_data.password) > 64:
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")

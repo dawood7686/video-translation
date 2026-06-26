@@ -37,6 +37,14 @@ def upload_video(
     if target_language not in SUPPORTED_LANGUAGES:
         raise HTTPException(status_code=400, detail="Unsupported target language")
 
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    # 50MB limit
+    if file_size > 50 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large")
+
     # Sanitize the filename to prevent path traversal
     safe_filename = os.path.basename(file.filename)
 
@@ -64,10 +72,6 @@ def upload_video(
     db.refresh(video)
 
     # Upload to MinIO
-    file.file.seek(0, 2)
-    file_size = file.file.tell()
-    file.file.seek(0)
-
     upload_file_stream(
         original_video_key,
         file.file,
