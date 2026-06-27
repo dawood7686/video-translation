@@ -34,5 +34,7 @@ class Video(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    # ⚡ Bolt Optimization: Add index to owner_id to prevent full table scans
+    # when the frontend dashboard polls the /videos/ endpoint for status updates
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
     owner = relationship("User", back_populates="videos")
