@@ -10,6 +10,7 @@ export default function UploadPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,6 +32,30 @@ export default function UploadPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type.startsWith('video/')) {
+        setFile(droppedFile);
+        setError('');
+      } else {
+        setError('Please upload a valid video file');
+      }
     }
   };
 
@@ -71,7 +96,11 @@ export default function UploadPage() {
         </p>
 
         <form onSubmit={handleUpload} className="mt-8 space-y-6">
-          {error && <div className="text-red-500 text-sm">{error}</div>}
+          {error && (
+            <div className="text-red-500 text-sm" role="alert">
+              {error}
+            </div>
+          )}
 
           <div>
             <label htmlFor="language" className="block text-sm font-medium leading-6 text-gray-900">
@@ -98,12 +127,21 @@ export default function UploadPage() {
             <label htmlFor="file-upload" className="block text-sm font-medium leading-6 text-gray-900">
               Video File
             </label>
-            <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+            <div
+              className={`mt-2 flex justify-center rounded-lg border border-dashed px-6 py-10 transition-colors ${
+                isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-900/25 bg-white'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <div className="text-center">
                 <div className="mt-4 flex text-sm leading-6 text-gray-600">
                   <label
                     htmlFor="file-upload"
-                    className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                    className={`relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500 ${
+                      isDragging ? 'bg-indigo-50' : 'bg-white'
+                    }`}
                   >
                     <span>Upload a file</span>
                     <input id="file-upload" name="file-upload" type="file" accept="video/mp4,video/x-m4v,video/*" className="sr-only" onChange={handleFileChange} />
