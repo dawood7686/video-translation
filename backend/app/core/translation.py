@@ -1,5 +1,5 @@
 import whisper
-import os
+from transformers import pipeline
 
 # Lazy loading of models so they don't block the API thread
 
@@ -21,8 +21,6 @@ def transcribe_audio(audio_path: str):
     return result
 
 # Simple dictionary fallback or we can use transformers pipeline
-from transformers import pipeline
-
 # Load translation model pipeline (e.g. NLLB or MarianMT)
 # Using a small MarianMT model for speed as an example, but we could use NLLB
 translation_pipes = {}

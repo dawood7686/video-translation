@@ -7,3 +7,8 @@
 **Vulnerability:** Background workers caught generic exceptions and saved the raw `str(e)` payload directly to the database. The public API endpoints then blindly mapped and returned this error_message field. This risks leaking internal environment specifics, database URIs, API keys, or exact internal paths if third-party libraries fail verbosely.
 **Learning:** Architectural boundaries must be respected. Just because an error is caught in a background worker doesn't mean it's safe to present to the end-user. Data bound for the frontend should always be considered untrusted and sanitized, or generically mapped, even if it originates internally.
 **Prevention:** Catch blocks in background processors should log the raw stack trace/error securely on the server-side, and only write safe, generic error strings to any status fields that are eventually serialized back to clients.
+
+## 2024-06-28 - Missing File Validation in Upload Endpoint
+**Vulnerability:** The application was vulnerable to arbitrary file uploads and DoS attacks through resource exhaustion because the backend file upload endpoint (`POST /upload`) completely lacked validation for both file type and file size. It blindly accepted any file sent by the client, relying entirely on the frontend's visual limits ("MP4 up to 50MB").
+**Learning:** Always enforce security constraints on the backend. Client-side validation is for UX, not security. A malicious user can easily bypass frontend limits using tools like curl or Postman.
+**Prevention:** Always validate `file.content_type` and enforce strict maximum file sizes on all upload endpoints.
