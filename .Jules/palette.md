@@ -5,3 +5,6 @@
 ## 2024-06-24 - File Upload Drag and Drop & Error Accessibility
 **Learning:** Adding `role="alert"` to error message containers ensures screen readers immediately announce form validation failures, improving accessibility without visual changes. Drag-and-drop file inputs are great for mouse users, but when providing a visual dropzone, it's essential to give clear visual feedback (like highlighting via `onDragOver`) during the drag operation to improve usability and confidence.
 **Action:** Always include `role="alert"` for dynamically rendered error messages in forms. Always add drag state tracking and visual styling for custom file dropzones.
+## 2026-06-28 - Error Roles and Input Labels
+**Learning:** For dynamic error states in forms, dynamically rendering a `role="alert"` container ensures immediate screen reader announcements. For inputs lacking visible labels (like email and password fields relying solely on placeholders), standard `id`/`htmlFor` pairing combined with `sr-only` classes allows full accessibility without altering the visual design.
+**Action:** When auditing forms, systematically check for missing `role="alert"` on error displays, and wrap hidden labels with `sr-only` instead of omitting them.
