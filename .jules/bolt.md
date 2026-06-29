@@ -4,3 +4,6 @@ Wait, `sum(list_of_segments, AudioSegment.empty())` is also O(N^2) in standard p
 Let's see if pydub has an easier way. `AudioSegment.empty()` actually just has an empty string `b""` for `_data`.
 Let's measure `b"".join([seg._data])`.
 **Action:** Avoid `+=` in loops for `AudioSegment`s. Collect them in a list or combine raw audio data.
+## 2024-06-29 - Missing indexes on frequently queried Foreign Keys
+**Learning:** In SQLAlchemy/PostgreSQL, `ForeignKey` columns are not automatically indexed. If the column is used for filtering in frequently hit or polled endpoints (e.g., `filter(Video.owner_id == current_user.id)`), this leads to O(N) full table scans in the database.
+**Action:** Always explicitly add `index=True` to `ForeignKey` definitions in SQLAlchemy models if they are used as primary filters in high-traffic endpoints.
