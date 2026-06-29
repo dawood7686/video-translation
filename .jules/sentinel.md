@@ -7,3 +7,8 @@
 **Vulnerability:** Background workers caught generic exceptions and saved the raw `str(e)` payload directly to the database. The public API endpoints then blindly mapped and returned this error_message field. This risks leaking internal environment specifics, database URIs, API keys, or exact internal paths if third-party libraries fail verbosely.
 **Learning:** Architectural boundaries must be respected. Just because an error is caught in a background worker doesn't mean it's safe to present to the end-user. Data bound for the frontend should always be considered untrusted and sanitized, or generically mapped, even if it originates internally.
 **Prevention:** Catch blocks in background processors should log the raw stack trace/error securely on the server-side, and only write safe, generic error strings to any status fields that are eventually serialized back to clients.
+
+## 2024-06-29 - Arbitrary File Upload and DoS Vulnerability
+**Vulnerability:** The application relied on client-side restrictions and implicit extensions instead of verifying file types and size directly on the backend. This allowed arbitrary files (e.g., executables) and excessively large files to be uploaded, creating a Denial of Service (DoS) risk and filling up storage with irrelevant content.
+**Learning:** Client-side limitations in forms and Dropzones are easily bypassed. The backend must independently enforce type, extension, and exact byte-size checks on the initial stream before moving data to storage or database.
+**Prevention:** Always check `file.content_type` against an allow-list (like `"video/"`) and use `file.file.seek(0, 2)` / `file.file.tell()` to verify maximum byte thresholds (`e.g., 50MB`) before accepting uploads.
