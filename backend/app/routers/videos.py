@@ -8,6 +8,7 @@ from .. import models, schemas, database
 from .auth import get_current_user
 from ..core.storage import upload_file_stream, get_presigned_url
 from ..worker import process_video_translation
+from ..core.config import settings
 
 router = APIRouter()
 
@@ -94,8 +95,6 @@ def get_video(video_id: int, current_user: models.User = Depends(get_current_use
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
     return _attach_urls_to_video(video)
-
-from ..core.config import settings
 
 def _attach_urls_to_video(video: models.Video) -> dict:
     video_dict = video.__dict__.copy()
