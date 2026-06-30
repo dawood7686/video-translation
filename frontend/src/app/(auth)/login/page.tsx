@@ -48,7 +48,7 @@ export default function LoginPage() {
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+          {error && <div role="alert" className="text-red-500 text-sm text-center">{error}</div>}
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>

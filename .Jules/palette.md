@@ -5,3 +5,6 @@
 ## 2024-06-24 - File Upload Drag and Drop & Error Accessibility
 **Learning:** Adding `role="alert"` to error message containers ensures screen readers immediately announce form validation failures, improving accessibility without visual changes. Drag-and-drop file inputs are great for mouse users, but when providing a visual dropzone, it's essential to give clear visual feedback (like highlighting via `onDragOver`) during the drag operation to improve usability and confidence.
 **Action:** Always include `role="alert"` for dynamically rendered error messages in forms. Always add drag state tracking and visual styling for custom file dropzones.
+## 2026-06-30 - Playwright Event Loop Blocking during Interception
+**Learning:** When using Playwright's `sync_api` for UI verification, using blocking functions like `time.sleep()` inside `page.route()` network interception handlers freezes the Playwright event loop. This prevents the browser UI from updating (e.g., showing loading states) because the thread is completely blocked.
+**Action:** If a delay is needed during network interception to capture loading states, use Playwright's built-in non-blocking asynchronous features or temporarily disable the route interception after triggering the action to allow React to re-render, then take the screenshot.
