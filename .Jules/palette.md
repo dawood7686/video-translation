@@ -5,3 +5,6 @@
 ## 2024-06-24 - File Upload Drag and Drop & Error Accessibility
 **Learning:** Adding `role="alert"` to error message containers ensures screen readers immediately announce form validation failures, improving accessibility without visual changes. Drag-and-drop file inputs are great for mouse users, but when providing a visual dropzone, it's essential to give clear visual feedback (like highlighting via `onDragOver`) during the drag operation to improve usability and confidence.
 **Action:** Always include `role="alert"` for dynamically rendered error messages in forms. Always add drag state tracking and visual styling for custom file dropzones.
+## 2026-06-25 - Form Accessibility and Interaction Polish
+**Learning:** Adding `sr-only` labels linked via `id` and `htmlFor` significantly improves form accessibility for screen reader users without disrupting the visual design. Furthermore, disabling form submission buttons and providing clear text updates (e.g., "Signing up...") during asynchronous API calls prevents duplicate submissions and gives users immediate, reassuring feedback.
+**Action:** When reviewing or creating forms, default to including visually hidden labels if traditional labels are absent, and mandate loading states on all async submission buttons.
