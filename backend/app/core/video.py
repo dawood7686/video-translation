@@ -1,5 +1,4 @@
 import ffmpeg
-import os
 import srt
 from datetime import timedelta
 
