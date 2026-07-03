@@ -1,0 +1,1 @@
+CREATE INDEX ix_videos_owner_id ON videos (owner_id);
