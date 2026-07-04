@@ -37,6 +37,9 @@ def upload_video(
     if target_language not in SUPPORTED_LANGUAGES:
         raise HTTPException(status_code=400, detail="Unsupported target language")
 
+    if not file.content_type or not file.content_type.startswith("video/"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Only video files are allowed.")
+
     # Sanitize the filename to prevent path traversal
     safe_filename = os.path.basename(file.filename)
 
@@ -49,6 +52,14 @@ def upload_video(
 
     unique_id = str(uuid.uuid4())
     original_video_key = f"{current_user.id}/{unique_id}/original.{file_extension}"
+
+    # Verify file size (max 100MB)
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large. Maximum size is 100MB.")
+    file.file.seek(0)
 
     # Save metadata to DB
     video = models.Video(
@@ -64,10 +75,6 @@ def upload_video(
     db.refresh(video)
 
     # Upload to MinIO
-    file.file.seek(0, 2)
-    file_size = file.file.tell()
-    file.file.seek(0)
-
     upload_file_stream(
         original_video_key,
         file.file,
