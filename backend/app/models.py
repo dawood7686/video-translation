@@ -34,5 +34,9 @@ class Video(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    # ⚡ Bolt Optimization: Added index=True to owner_id.
+    # The frontend polls the list of videos frequently, which filters by owner_id.
+    # By default, PostgreSQL does not create indexes on foreign keys, leading to
+    # full table scans. Adding an index here improves query performance significantly.
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
     owner = relationship("User", back_populates="videos")
