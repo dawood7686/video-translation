@@ -34,5 +34,9 @@ class Video(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    # ⚡ Bolt Optimization: Add index=True to owner_id ForeignKey.
+    # The frontend frequently polls the /videos endpoint which filters by owner_id.
+    # SQLAlchemy does not automatically create indexes for ForeignKeys in PostgreSQL.
+    # Adding this index prevents slow full table scans and significantly improves query speed as the videos table grows.
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
     owner = relationship("User", back_populates="videos")
