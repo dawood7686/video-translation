@@ -7,3 +7,7 @@
 **Vulnerability:** Background workers caught generic exceptions and saved the raw `str(e)` payload directly to the database. The public API endpoints then blindly mapped and returned this error_message field. This risks leaking internal environment specifics, database URIs, API keys, or exact internal paths if third-party libraries fail verbosely.
 **Learning:** Architectural boundaries must be respected. Just because an error is caught in a background worker doesn't mean it's safe to present to the end-user. Data bound for the frontend should always be considered untrusted and sanitized, or generically mapped, even if it originates internally.
 **Prevention:** Catch blocks in background processors should log the raw stack trace/error securely on the server-side, and only write safe, generic error strings to any status fields that are eventually serialized back to clients.
+## 2026-07-05 - Unrestricted File Upload
+**Vulnerability:** The video upload endpoint accepts any file type and size without limits, creating a DoS and arbitrary file upload risk.
+**Learning:** Relying purely on client-side limits is insufficient; FastAPIs `UploadFile` streams must be strictly validated before processing.
+**Prevention:** Always validate `file.content_type` and manually check size via `file.file.seek(0, 2)` and `file.file.tell()` before writing to DB/Storage.
