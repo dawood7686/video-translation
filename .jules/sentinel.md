@@ -7,3 +7,13 @@
 **Vulnerability:** Background workers caught generic exceptions and saved the raw `str(e)` payload directly to the database. The public API endpoints then blindly mapped and returned this error_message field. This risks leaking internal environment specifics, database URIs, API keys, or exact internal paths if third-party libraries fail verbosely.
 **Learning:** Architectural boundaries must be respected. Just because an error is caught in a background worker doesn't mean it's safe to present to the end-user. Data bound for the frontend should always be considered untrusted and sanitized, or generically mapped, even if it originates internally.
 **Prevention:** Catch blocks in background processors should log the raw stack trace/error securely on the server-side, and only write safe, generic error strings to any status fields that are eventually serialized back to clients.
+
+## 2026-07-06 - Arbitrary File Upload and DoS Vulnerability
+**Vulnerability:** The application allowed file uploads without validating the file type or enforcing a strict file size limit before processing. It relied on the client's  but didn't verify it or check the file size in the backend. An attacker could upload huge files causing a DoS attack or arbitrary files (like executable scripts) into MinIO, potentially leading to storage exhaustion or remote code execution depending on how MinIO serves the files.
+**Learning:** Client-side validation is easily bypassed. Never trust the file type or assume the file size is safe. Always validate the `content_type` server-side and enforce file size limits manually before reading the file into memory or saving it to storage.
+**Prevention:** Use `file.file.seek(0, 2)` and `file.file.tell()` to securely check the uploaded file size before processing. Validate `file.content_type.startswith('video/')` for video endpoints.
+
+## 2024-06-25 - Arbitrary File Upload and DoS Vulnerability
+**Vulnerability:** The application allowed file uploads without validating the file type or enforcing a strict file size limit before processing. An attacker could upload huge files causing a DoS attack or arbitrary files into MinIO, potentially leading to storage exhaustion or remote code execution.
+**Learning:** Client-side validation is easily bypassed. Never trust the file type or assume the file size is safe. Always validate the `content_type` server-side and enforce file size limits manually before reading the file into memory or saving it to storage.
+**Prevention:** Use `file.file.seek(0, 2)` and `file.file.tell()` to securely check the uploaded file size before processing. Validate `file.content_type.startswith('video/')` for video endpoints.
