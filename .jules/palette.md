@@ -1,0 +1,3 @@
+## 2024-07-08 - Inconsistent Form Accessibility in Sibling Components
+**Learning:** Forms within the same design system (e.g., auth pages) can easily drift in accessibility standards. In this case, the `login` form properly utilized `sr-only` labels and linked `id`s, while the `signup` form omitted them entirely, leading to a degraded screen reader experience on just one side of the auth flow. Also loading state is missing in the signup form.
+**Action:** When adding or modifying a form component, consistently cross-reference sibling components to ensure standardized accessibility practices are maintained.
