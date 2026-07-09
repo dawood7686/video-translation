@@ -34,5 +34,7 @@ class Video(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    # ⚡ Bolt Optimization: Added index=True to prevent slow full table scans
+    # when querying videos by owner_id in the frequently polled list_videos endpoint.
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
     owner = relationship("User", back_populates="videos")
