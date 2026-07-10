@@ -4,3 +4,7 @@ Wait, `sum(list_of_segments, AudioSegment.empty())` is also O(N^2) in standard p
 Let's see if pydub has an easier way. `AudioSegment.empty()` actually just has an empty string `b""` for `_data`.
 Let's measure `b"".join([seg._data])`.
 **Action:** Avoid `+=` in loops for `AudioSegment`s. Collect them in a list or combine raw audio data.
+
+## 2026-07-10 - Add Database Index on ForeignKey
+**Learning:** SQLAlchemy does not automatically generate indexes for Postgres ForeignKey columns. Missing indexes on frequently polled filtering columns (like `owner_id`) can cause slow full table scans. Also, since this backend uses `Base.metadata.create_all` which doesn't alter tables, manual SQL scripts are required for migrations.
+**Action:** Always explicitly add `index=True` to `ForeignKey` columns used in queries and create accompanying SQL scripts for table alterations.
