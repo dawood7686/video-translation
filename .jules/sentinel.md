@@ -7,3 +7,8 @@
 **Vulnerability:** Background workers caught generic exceptions and saved the raw `str(e)` payload directly to the database. The public API endpoints then blindly mapped and returned this error_message field. This risks leaking internal environment specifics, database URIs, API keys, or exact internal paths if third-party libraries fail verbosely.
 **Learning:** Architectural boundaries must be respected. Just because an error is caught in a background worker doesn't mean it's safe to present to the end-user. Data bound for the frontend should always be considered untrusted and sanitized, or generically mapped, even if it originates internally.
 **Prevention:** Catch blocks in background processors should log the raw stack trace/error securely on the server-side, and only write safe, generic error strings to any status fields that are eventually serialized back to clients.
+
+## 2024-07-10 - Unvalidated File Uploads
+**Vulnerability:** The video upload endpoint blindly accepted any file type without validating its content, and did not impose a file size limit. This could allow an attacker to upload arbitrary files (e.g., executable code) and consume excessive server resources or storage, leading to a Denial of Service (DoS).
+**Learning:** Always validate file metadata on the server-side before accepting the upload. Relying entirely on client-side validation is insecure.
+**Prevention:** Enforce strict file type validation using `file.content_type.startswith()` and limit file size explicitly using `file.file.seek(0, 2)` and `file.file.tell()` during processing.
