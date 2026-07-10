@@ -1,6 +1,5 @@
 import edge_tts
 import asyncio
-import os
 
 # Map standard language codes to edge-tts voice names
 # This is a small subset, edge_tts has many more

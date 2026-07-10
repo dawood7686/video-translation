@@ -1,5 +1,4 @@
 import whisper
-import os
 
 # Lazy loading of models so they don't block the API thread
 
